@@ -146,8 +146,6 @@ def generate_pom():
     # Collect selectors from the moved_text and check content
     selectors = moved_text.get("1.0", END).strip().splitlines()
 
-    # Debugging: Print the selectors list to verify it’s populated correctly
-    # print("Captured selectors:", selectors)
 
     # Clear the moved_text area before generating the POM
     moved_text.delete(1.0, END)
