@@ -109,6 +109,18 @@ def move_selected_lines():
     except tk.TclError:
         print("No text selected to move.")  # If no text is selected, an error will be caught here
 
+# Event binding to clear default text on focus
+def on_entry_focus(event):
+    if entry.get() == "ID, Name, ClassName, LinkText, PartialLinkText, TagName":
+        entry.config(fg="black")
+
+# Restore default text if the entry is empty on focus out
+def on_entry_focusout(event):
+    if entry.get() == "":
+        entry.insert(0, "ID, Name, ClassName, LinkText, PartialLinkText, TagName")
+        entry.config(fg="grey")
+
+
 
 # Placeholder management functions for the class name entry
 def on_entry_click(event):
@@ -129,7 +141,7 @@ def generate_pom():
 
 
     # Retrieve the class name from the class_name_entry box
-    class_name = class_name_entry.get() or "TestPage"
+    class_name = class_name_entry.get().strip() or "Test"
 
     # Collect selectors from the moved_text and check content
     selectors = moved_text.get("1.0", END).strip().splitlines()
@@ -146,16 +158,16 @@ def generate_pom():
         if "@id='" in selector:
             # Extract ID value
             name_part = selector.split("@id='")[1].split("']")[0]
-            name = f"{name_part}_id"
+            name = f"{name_part}"
         elif "@name='" in selector:
             # Extract name attribute
             name_part = selector.split("@name='")[1].split("']")[0]
-            name = f"{name_part}_name"
+            name = f"{name_part}"
         elif "contains(@class," in selector:
             # Extract class values for combined class selectors
             classes = selector.split("contains(@class, '")
             class_names = "_".join(cls.split("')")[0] for cls in classes[1:])
-            name = f"{class_names}_class"
+            name = f"{class_names}"
         elif "text()=" in selector or "contains(text()," in selector:
             # Handle text-based selectors
             if "text()=" in selector:
@@ -195,10 +207,12 @@ class {class_name.capitalize()}Page(Selenium_Driver):
         pom_code += f"    {locator_name} = \"{element['locator']}\"\n"
 
     pom_code += "\n    # Functions\n"
+
     for element in elements:
-        function_name = f"click_{element['name']}"
+        function_name = f"{element['name']}"
+        function_name2 = f"{element['name']}"
         pom_code += f"\n    def {function_name}(self):\n"
-        pom_code += f"        self.elementClick(self.{locator_name}, locatorType='xpath')\n"
+        pom_code += f"        self.element(self.__{function_name2}, locatorType='xpath')\n"
 
     # Display the generated POM in moved_text
     moved_text.insert(END, pom_code)
@@ -240,7 +254,12 @@ label = tk.Label(root, text="Enter Selector Priorities (comma-separated): \n ID,
 label.grid(row=0, column=0, sticky="w", padx=10, pady=(10, 2))
 
 entry = tk.Entry(root, width=50, bg=entry_bg, fg="#333333", relief="solid")
+entry.insert(0, "ID, Name, ClassName, LinkText, PartialLinkText, TagName")
 entry.grid(row=1, column=0, sticky="ew", padx=10, pady=(0, 5))
+
+# Bind the focus and focusout events
+entry.bind("<FocusIn>", on_entry_focus)
+entry.bind("<FocusOut>", on_entry_focusout)
 
 fetch_button = tk.Button(root, text="Fetch Selectors", command=fetch_selectors, bg=button_bg, relief="groove")
 fetch_button.grid(row=1, column=1, sticky="ew", padx=(0, 10), pady=(0, 5))
