@@ -229,7 +229,7 @@ def save_to_file():
 
 # Set up the tkinter UI
 root = tk.Tk()
-root.title("NessQ POM Creator")
+root.title("NessQ POM Generator")
 
 # # Load and set the icon
 # icon_path = "C:\\Vikram\\Codebase\\Python\\PythonW3SchoolLearning\\PomGeneratorTkinter\\Nessicon.png"   # Replace with your icon path
